@@ -1,6 +1,6 @@
 -- 1) Obtener lista de materias ordenadas por mayor carga horaria. Crear vista llamada "Horas por Asignatura"
-create view v_materias as select nombre, horas_semanales from materias order by horas_semanales desc;
-select * from v_materias;
+create view horas_por_asignatura as select nombre, horas_semanales from materias order by horas_semanales desc;
+select * from horas_por_asignatura;
 
 /* 2) Obtener listín de alumnos en orden alfabético. Mostrar los siguientes datos:
 - Nombre y apellido en formato -> "Apellido, Nombre"
