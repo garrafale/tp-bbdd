@@ -90,7 +90,17 @@ BEGIN
     anio_nac := extract(year from new.fec_nac);
 
     if anio_nac < 2008 or anio_nac > 2017 then
-        RAISE EXCEPTION 'La fecha de nacimiento debe estar entre 2008 y 2017';
+        raise exception 'La fecha de nacimiento debe estar entre 2008 y 2017';
+    end if;
+    return new;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION f_verificar_calificacion()
+RETURNS TRIGGER language plpgsql as $$
+BEGIN
+    if new.calificacion < 0 or new.calificacion > 10 then
+        raise exception 'La calificación debe estar entre 0 y 10';
     end if;
     return new;
 END;
@@ -106,4 +116,26 @@ for each ROW
 execute function f_verificar_anio_nac();
 
 INSERT INTO alumnos(nombre, apellido, fec_nac, domic_calle, domic_numero, sexos_id)
-VALUES('Alejandro', 'Luna', '2009-06-18', 'Corrientes', 5303, 1);
+VALUES('Alejandro', 'Luna', '2019-06-18', 'Corrientes', 5303, 1);
+
+CREATE OR REPLACE TRIGGER tr_verificar_calificacion
+BEFORE INSERT
+on examenes
+for each ROW
+execute function f_verificar_calificacion();
+
+INSERT INTO examenes(fecha, calificacion, profesores_has_materias_profesores_id, profesores_has_materias_materias_id, alumnos_id)
+VALUES('2022-05-04', 5, 1, 1, 1);
+
+
+-----------------------------------------------------------------
+---------------------------VISTAS--------------------------------
+-----------------------------------------------------------------
+create view listado_alumnos as select apellido, nombre, fec_nac from alumnos order by apellido, nombre;
+create view info_examenes as select e.id, e.fecha, e.calificacion,
+       a.apellido apellido_alumno, a.nombre nombre_alumno
+from examenes e
+join alumnos a
+on e.alumnos_id = a.id
+order by calificacion desc;
+
